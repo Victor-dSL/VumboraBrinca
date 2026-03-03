@@ -4,15 +4,15 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 // @ts-ignore
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
+import {
+  getFirestore,
+  collection,
+  addDoc,
   setDoc,
-  onSnapshot, 
-  doc, 
-  deleteDoc, 
-  query, 
+  onSnapshot,
+  doc,
+  deleteDoc,
+  query,
   orderBy,
   limit,
   getDocs,
@@ -40,12 +40,13 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 // Fix: Export auth and signInWithEmailAndPassword for centralized usage
 // @ts-ignore
-export const auth = getAuth(app); 
+export const auth = getAuth(app);
 export { signInWithEmailAndPassword };
 
-const activeCollection = collection(db, 'active_entries');
-const historyCollection = collection(db, 'history'); 
-const registeredCollection = collection(db, 'registered_children');
+export const activeCollection = collection(db, 'active_entries');
+export const historyCollection = collection(db, 'history');
+export const registeredCollection = collection(db, 'registered_children');
+export const assignmentsCollection = collection(db, 'gym_assignments');
 const configDocRef = doc(db, 'settings', 'whatsapp_api');
 const sweepDocRef = doc(db, 'settings', 'renewal_sweep');
 
@@ -91,19 +92,38 @@ export const deleteActiveEntry = async (id: string) => {
   await deleteDoc(doc(db, 'active_entries', id));
 };
 
+export const saveAssignment = async (assignment: { id: string, startSlotIndex: number }) => {
+  await setDoc(doc(db, 'gym_assignments', assignment.id), assignment);
+};
+
+export const subscribeToAssignments = (onData: (data: any[]) => void) => {
+  return onSnapshot(assignmentsCollection, (snapshot) => {
+    onData(snapshot.docs.map(doc => ({ ...doc.data() })));
+  });
+};
+
+export const deleteAssignment = async (id: string) => {
+  await deleteDoc(doc(db, 'gym_assignments', id));
+};
+
+export const saveRegistration = async (data: any) => {
+  const docRef = await addDoc(registeredCollection, {
+    ...data,
+    enrollmentId: await getNextEnrollmentId()
+  });
+  return docRef.id;
+};
 export const getNextEnrollmentId = async () => {
   try {
     // Busca o maior ID de matrícula ordenando decrescentemente
     const q = query(registeredCollection, orderBy('enrollmentId', 'desc'), limit(1));
     const snapshot = await getDocs(q);
-    
     if (snapshot.empty) return "0001";
-    
     const lastId = snapshot.docs[0].data().enrollmentId;
     // Tenta converter para número, se falhar ou não for numérico, assume 0
     const lastNum = parseInt(lastId, 10);
     const nextNumber = (isNaN(lastNum) ? 0 : lastNum) + 1;
-    
+
     return nextNumber.toString().padStart(4, '0');
   } catch (error) {
     console.error("Erro ao gerar matrícula:", error);
@@ -137,7 +157,7 @@ export const fetchFidelityResets = async () => {
 
 export const addEntry = async (entry: Omit<KidEntry, 'id'>) => {
   try {
-    const entryData = { 
+    const entryData = {
       ...entry,
       formattedEntryTime: new Date(entry.entryTime).toLocaleString('pt-BR'),
       isPaid: entry.isPaid || false,
@@ -169,7 +189,7 @@ export const registerChild = async (data: ChildRegistration) => {
 
 export const updatePaymentStatus = async (id: string, isPaid: boolean, method?: PaymentMethod) => {
   const docRef = doc(db, 'active_entries', id);
-  await updateDoc(docRef, { 
+  await updateDoc(docRef, {
     isPaid: isPaid,
     paymentMethod: method || (isPaid ? 'não informado' : null)
   });
@@ -197,10 +217,9 @@ export const checkoutEntry = async (entry: KidEntry) => {
     const exitTime = Date.now();
     const entryTime = Number(entry.entryTime) || Date.now();
     const pkgDuration = Number(entry.packageDuration) || 30;
-    
     let totalPaused = Number(entry.totalPausedTime) || 0;
     if (entry.isPaused && entry.pausedAt) {
-        totalPaused += (exitTime - entry.pausedAt);
+      totalPaused += (exitTime - entry.pausedAt);
     }
 
     const rawTimeDiff = exitTime - entryTime;
@@ -208,12 +227,12 @@ export const checkoutEntry = async (entry: KidEntry) => {
     const timeSpentSeconds = Math.floor(effectiveTimeSpentMs / 1000);
     const expectedDurationSeconds = pkgDuration * 60;
     const diffSeconds = timeSpentSeconds - expectedDurationSeconds;
-    
+
     const absDiff = Math.abs(diffSeconds);
     const diffMin = Math.floor(absDiff / 60);
     const diffSec = absDiff % 60;
     const formattedDiff = `${diffMin}m ${diffSec}s`;
-    
+
     let finalStatusString = "";
     if (diffSeconds > 0) finalStatusString = `Excedeu: ${formattedDiff}`;
     else if (diffSeconds < 0) finalStatusString = `Restou: ${formattedDiff}`;
@@ -241,7 +260,7 @@ export const checkoutEntry = async (entry: KidEntry) => {
 
     await addDoc(historyCollection, historyData);
     if (entry.id) {
-        await deleteDoc(doc(db, 'active_entries', entry.id));
+      await deleteDoc(doc(db, 'active_entries', entry.id));
     }
   } catch (error) {
     console.error("ERRO NO CHECKOUT:", error);
@@ -266,7 +285,7 @@ export const subscribeToRegistrations = (onData: (entries: ChildRegistration[]) 
 
 export const fetchRegistrationsByDateRange = async (startDate: number, endDate: number) => {
   const q = query(
-    registeredCollection, 
+    registeredCollection,
     where('createdAt', '>=', startDate),
     where('createdAt', '<=', endDate),
     orderBy('createdAt', 'desc')
@@ -281,9 +300,14 @@ export const fetchHistory = async (customLimit: number = 2000) => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HistoryRecord));
 };
 
+export const fetchAllRegistrations = async () => {
+  const snapshot = await getDocs(registeredCollection);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ChildRegistration));
+};
+
 export const fetchHistoryByDateRange = async (startDate: number, endDate: number) => {
   const q = query(
-    historyCollection, 
+    historyCollection,
     where('actualExitTime', '>=', startDate),
     where('actualExitTime', '<=', endDate),
     orderBy('actualExitTime', 'desc')

@@ -1,11 +1,10 @@
-
 import React from 'react';
-import { Clock, PlusSquare, Settings, FileText, BarChart3, LogOut, Image as ImageIcon } from 'lucide-react';
+import { Clock, PlusSquare, Settings, FileText, BarChart3, LogOut, Image as ImageIcon, Calendar } from 'lucide-react';
 import { User, ApiConfig } from '../types';
 
 interface SidebarProps {
-  activeTab: 'dashboard' | 'extras' | 'history' | 'reports' | 'connections';
-  onTabChange: (tab: 'dashboard' | 'extras' | 'history' | 'reports' | 'connections') => void;
+  activeTab: 'dashboard' | 'extras' | 'history' | 'reports' | 'agenda' | 'connections';
+  onTabChange: (tab: 'dashboard' | 'extras' | 'history' | 'reports' | 'agenda' | 'connections') => void;
   hasNotification?: boolean;
   user: User | null;
   onLogout: () => void;
@@ -19,10 +18,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, hasNotificati
     <aside className="w-24 bg-blue-900 flex flex-col items-center py-6 text-white shadow-xl h-screen sticky top-0">
       <div className="mb-8 p-1 bg-white rounded-2xl shadow-lg border-2 border-blue-400 overflow-hidden w-16 h-16 flex items-center justify-center">
         {logoBase64 ? (
-          <img 
-            src={logoBase64} 
-            alt="Vumbora" 
-            className="w-full h-full object-contain" 
+          <img
+            src={logoBase64}
+            alt="Vumbora"
+            className="w-full h-full object-contain"
           />
         ) : (
           <div className="text-blue-600 flex flex-col items-center">
@@ -35,11 +34,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, hasNotificati
       <nav className="flex-1 flex flex-col gap-6 w-full px-2">
         <button
           onClick={() => onTabChange('dashboard')}
-          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${
-            activeTab === 'dashboard' 
-              ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105' 
-              : 'text-blue-200 hover:bg-blue-800 hover:text-white'
-          }`}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${activeTab === 'dashboard'
+            ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105'
+            : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+            }`}
           title="Monitoramento"
         >
           <Clock size={24} strokeWidth={activeTab === 'dashboard' ? 2.5 : 2} />
@@ -48,11 +46,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, hasNotificati
 
         <button
           onClick={() => onTabChange('extras')}
-          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${
-            activeTab === 'extras' 
-              ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105' 
-              : 'text-blue-200 hover:bg-blue-800 hover:text-white'
-          }`}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${activeTab === 'extras'
+            ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105'
+            : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+            }`}
           title="Novo Cadastro"
         >
           <PlusSquare size={24} strokeWidth={activeTab === 'extras' ? 2.5 : 2} />
@@ -61,11 +58,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, hasNotificati
 
         <button
           onClick={() => onTabChange('history')}
-          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${
-            activeTab === 'history' 
-              ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105' 
-              : 'text-blue-200 hover:bg-blue-800 hover:text-white'
-          }`}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${activeTab === 'history'
+            ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105'
+            : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+            }`}
           title="Histórico de Visitas"
         >
           <FileText size={24} strokeWidth={activeTab === 'history' ? 2.5 : 2} />
@@ -73,12 +69,23 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, hasNotificati
         </button>
 
         <button
+          onClick={() => onTabChange('agenda')}
+          className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${activeTab === 'agenda'
+            ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105'
+            : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+            }`}
+          title="Agenda Academia"
+        >
+          <Calendar size={24} strokeWidth={activeTab === 'agenda' ? 2.5 : 2} />
+          <span className="text-[9px] mt-1 font-black text-center uppercase tracking-tighter leading-none">Agenda</span>
+        </button>
+
+        <button
           onClick={() => onTabChange('reports')}
-          className={`relative flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${
-            activeTab === 'reports' 
-              ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105' 
-              : 'text-blue-200 hover:bg-blue-800 hover:text-white'
-          }`}
+          className={`relative flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${activeTab === 'reports'
+            ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105'
+            : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+            }`}
           title="Relatórios e Fidelidade"
         >
           {hasNotification && (
@@ -94,11 +101,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, hasNotificati
         {isAdmin && (
           <button
             onClick={() => onTabChange('connections')}
-            className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${
-              activeTab === 'connections' 
-                ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105' 
-                : 'text-blue-200 hover:bg-blue-800 hover:text-white'
-          }`}
+            className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 group ${activeTab === 'connections'
+              ? 'bg-blue-600 text-white shadow-lg translate-x-1 scale-105'
+              : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+              }`}
             title="Ajustes de API e Sistema"
           >
             <Settings size={24} strokeWidth={activeTab === 'connections' ? 2.5 : 2} />

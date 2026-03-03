@@ -19,14 +19,14 @@ export const formatPhone = (phone: string) => {
 export const sendWhatsappDirect = async (phone: string, message: string, autoOpen: boolean = false): Promise<boolean> => {
   const config = await getApiConfigOnce();
   const formattedPhone = formatPhone(phone);
-  
+
   if (config && config.token && config.baseUrl && !autoOpen) {
     const cleanToken = config.token.trim();
     const cleanEndpoint = config.endpoint.trim().startsWith('/') ? config.endpoint.trim() : `/${config.endpoint.trim()}`;
     const normalizedBaseUrl = config.baseUrl.trim().replace(/\/$/, '');
-    
+
     let url = `${normalizedBaseUrl}${cleanEndpoint}`;
-    
+
     // Se estiver em navegador, um Proxy de CORS pode ser necessário se a API não suportar chamadas diretas do front
     if (config.useProxy && config.proxyUrl) {
       url = `${config.proxyUrl.trim().replace(/\/$/, '')}/${url}`;
@@ -41,27 +41,40 @@ export const sendWhatsappDirect = async (phone: string, message: string, autoOpe
     };
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${cleanToken}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(body),
-      });
+      const sendRequest = async (retryCount = 0): Promise<boolean> => {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${cleanToken}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(body),
+        });
 
-      const responseData = await response.json();
+        const responseData = await response.json();
 
-      if (!response.ok || responseData.success === false) {
-        console.error("Erro na API do WhatsApp:", JSON.stringify(responseData));
-        return false;
-      }
+        // Tratamento de Rate Limit (Account Protection)
+        if (responseData.message?.includes('Account Protection') || responseData.message?.includes('5 seconds') || response.status === 429) {
+          if (retryCount < 2) {
+            const waitTime = (responseData.retry_after || 5) * 1000 + 500;
+            console.warn(`[WhatsApp] Rate limit atingido. Aguardando ${waitTime}ms para tentar novamente...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            return sendRequest(retryCount + 1);
+          }
+        }
 
-      return true;
+        if (!response.ok || responseData.success === false) {
+          console.error("Erro na API do WhatsApp:", JSON.stringify(responseData));
+          return false;
+        }
+
+        return true;
+      };
+
+      return await sendRequest();
     } catch (e) {
       console.error("Erro ao enviar mensagem via API:", e);
-      // Fallback para link manual se a API falhar e autoOpen estiver permitido
       if (autoOpen) {
         window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
       }

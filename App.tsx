@@ -8,6 +8,8 @@ import RegistrationPanel from './components/RegistrationPanel';
 import HistoryPanel from './components/HistoryPanel';
 import ReportsPanel from './components/ReportsPanel';
 import ConnectionsPanel from './components/ConnectionsPanel';
+import AgendaAcademiaPanel from './components/AgendaAcademiaPanel';
+import PublicBooking from './components/PublicBooking';
 import Login from './components/Login';
 import { subscribeToActiveEntries, fetchHistory, getApiConfigOnce, subscribeToRegistrations, getLastSweepDate, setLastSweepDate, subscribeToApiConfig } from './firebase';
 import { KidEntry, ChildRegistration, User, ApiConfig } from './types';
@@ -15,12 +17,16 @@ import { AlertTriangle, User as UserIcon } from 'lucide-react';
 import { sendWhatsappDirect, getRenewalMessageTemplate } from './whatsappService';
 
 const App: React.FC = () => {
+  const [isPublicPage] = useState(() => {
+    return new URLSearchParams(window.location.search).get('page') === 'agendar';
+  });
+
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('vumbora_user');
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'extras' | 'history' | 'reports' | 'connections'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'extras' | 'history' | 'reports' | 'agenda' | 'connections'>('dashboard');
   const [activeEntries, setActiveEntries] = useState<KidEntry[]>([]);
   const [allRegistrations, setAllRegistrations] = useState<ChildRegistration[]>([]);
   const [stats, setStats] = useState({ active: 0, warning: 0, expired: 0 });
@@ -46,7 +52,7 @@ const App: React.FC = () => {
     const unsubscribeActive = subscribeToActiveEntries(
       (entries) => {
         setActiveEntries(entries);
-        setConnectionError(null); 
+        setConnectionError(null);
       },
       (error: any) => setConnectionError("Erro de conexão.")
     );
@@ -92,14 +98,14 @@ const App: React.FC = () => {
 
       const warningDays = config.renewalWarningDays || 5;
       const today = new Date();
-      
+
       const gymPlans = allRegistrations.filter(r => r.isGymPlan);
-      
+
       for (const reg of gymPlans) {
         const year = today.getFullYear();
         const month = today.getMonth();
         const nextDue = new Date(year, month, reg.registrationDay);
-        
+
         if (today > nextDue) {
           nextDue.setMonth(nextDue.getMonth() + 1);
         }
@@ -124,7 +130,7 @@ const App: React.FC = () => {
     if (!user) return;
     const checkFidelidade = async () => {
       try {
-        const history = await fetchHistory(5000); 
+        const history = await fetchHistory(5000);
         const counts: Record<string, number> = {};
         let anyoneReached10 = false;
         history.forEach(rec => {
@@ -160,6 +166,10 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [activeEntries, user]);
 
+  if (isPublicPage) {
+    return <PublicBooking />;
+  }
+
   if (!user) {
     return <Login onLogin={handleLogin} />;
   }
@@ -171,9 +181,9 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <Sidebar 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab} 
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         hasNotification={hasLoyaltyNotification}
         user={user}
         onLogout={handleLogout}
@@ -188,9 +198,10 @@ const App: React.FC = () => {
               {activeTab === 'extras' && 'Cadastros'}
               {activeTab === 'history' && 'Histórico'}
               {activeTab === 'reports' && 'Fidelidade'}
+              {activeTab === 'agenda' && 'Agenda Academia'}
               {activeTab === 'connections' && 'Ajustes'}
             </h1>
-            
+
             <div className="flex items-center gap-4">
               {connectionError && (
                 <div className="flex items-center text-red-500 text-xs font-black animate-pulse bg-red-50 px-3 py-1.5 rounded-full border border-red-100 uppercase">
@@ -223,6 +234,7 @@ const App: React.FC = () => {
           {activeTab === 'extras' && <RegistrationPanel />}
           {activeTab === 'history' && <HistoryPanel />}
           {activeTab === 'reports' && <ReportsPanel />}
+          {activeTab === 'agenda' && <AgendaAcademiaPanel />}
           {activeTab === 'connections' && user.role === 'admin' && <ConnectionsPanel />}
         </main>
 
