@@ -1,13 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-<<<<<<< HEAD
-import { ShieldCheck, Link2, Key, Send, Globe, Loader2, CheckCircle, AlertCircle, Save, MessageSquare, Clock, Dumbbell, UserCheck, Eye, EyeOff, CreditCard, CalendarDays, HeartHandshake, Image as ImageIcon, Upload, Trash2 } from 'lucide-react';
-import { saveApiConfig, subscribeToApiConfig } from '../firebase';
-=======
 import { ShieldCheck, Link2, Key, Send, Globe, Loader2, CheckCircle, AlertCircle, Save, MessageSquare, Clock, Dumbbell, UserCheck, Eye, EyeOff, CreditCard, CalendarDays, HeartHandshake, Image as ImageIcon, Upload, Trash2, Pause, Play, XCircle } from 'lucide-react';
 import { saveApiConfig, subscribeToApiConfig, fetchHistory, fetchAllRegistrations } from '../firebase';
 import { sendWhatsappDirect } from '../whatsappService';
->>>>>>> babe606 (Implementação de Envio em Massa, Agenda Academia e Formulário Público de Agendamento)
 import { ApiConfig } from '../types';
 
 const ConnectionsPanel: React.FC = () => {
@@ -35,8 +30,6 @@ const ConnectionsPanel: React.FC = () => {
   const [status, setStatus] = useState<{ success?: boolean; message?: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-<<<<<<< HEAD
-=======
   // Estados para Envio em Massa
   const [bulkMessages, setBulkMessages] = useState({ gym: '', standard: '', last: '' });
   const [lastVisitorsQty, setLastVisitorsQty] = useState(10);
@@ -184,7 +177,6 @@ const ConnectionsPanel: React.FC = () => {
     }
   };
 
->>>>>>> babe606 (Implementação de Envio em Massa, Agenda Academia e Formulário Público de Agendamento)
   useEffect(() => {
     const unsubscribe = subscribeToApiConfig((data) => {
       if (data) setConfig(prev => ({ ...prev, ...data }));
@@ -213,11 +205,7 @@ const ConnectionsPanel: React.FC = () => {
         alert("Por favor, selecione apenas arquivos .PNG");
         return;
       }
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> babe606 (Implementação de Envio em Massa, Agenda Academia e Formulário Público de Agendamento)
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
@@ -311,131 +299,6 @@ const ConnectionsPanel: React.FC = () => {
           </div>
 
           <div className="space-y-6 pt-8 border-t border-gray-100">
-<<<<<<< HEAD
-             <div className="flex items-center gap-3 text-gray-800">
-               <div className="bg-green-100 p-2 rounded-lg"><CreditCard className="text-green-600" size={20} /></div>
-               <h3 className="font-black uppercase text-sm tracking-widest">Ajuste de Valores (Academia)</h3>
-             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-green-50/50 p-4 rounded-xl border border-green-100">
-                  <label className="block text-[10px] font-black text-green-700 mb-2 uppercase tracking-widest">Valor Mensalidade (Mensal)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-green-600">R$</span>
-                    <input 
-                      type="number" 
-                      className="w-full border-2 border-green-100 rounded-xl p-3 pl-12 bg-white text-black font-black text-xl"
-                      value={config.gymMonthlyPrice}
-                      onChange={e => setConfig({...config, gymMonthlyPrice: Number(e.target.value)})}
-                    />
-                  </div>
-                </div>
-                <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                  <label className="block text-[10px] font-black text-blue-700 mb-2 uppercase tracking-widest">Valor Mensalidade (Trimestral)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-blue-600">R$</span>
-                    <input 
-                      type="number" 
-                      className="w-full border-2 border-blue-100 rounded-xl p-3 pl-12 bg-white text-black font-black text-xl"
-                      value={config.gymQuarterlyPrice}
-                      onChange={e => setConfig({...config, gymQuarterlyPrice: Number(e.target.value)})}
-                    />
-                  </div>
-                </div>
-             </div>
-          </div>
-
-          <div className="space-y-6 pt-8 border-t border-gray-100">
-             <div className="flex items-center gap-3 text-gray-800">
-               <MessageSquare className="text-blue-600" size={24} />
-               <h3 className="font-black uppercase text-sm tracking-widest">MENSAGENS E GATILHOS</h3>
-             </div>
-
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="bg-yellow-50/30 p-6 rounded-2xl border border-yellow-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <Clock size={20} className="text-orange-500" />
-                      <label className="text-[11px] font-black text-gray-600 uppercase tracking-widest">MINUTOS ANTECEDÊNCIA (SAÍDA)</label>
-                    </div>
-                    <input 
-                      type="number" 
-                      className="w-16 border-2 border-orange-200 rounded-lg p-2 text-center font-black bg-white text-black"
-                      value={config.warningMinutes}
-                      onChange={e => setConfig({...config, warningMinutes: Number(e.target.value)})}
-                    />
-                  </div>
-                  <textarea 
-                    className="w-full border-2 border-gray-100 rounded-xl p-4 bg-white text-black text-sm font-bold focus:border-blue-500 outline-none"
-                    rows={3}
-                    value={config.warningMessage}
-                    onChange={e => setConfig({...config, warningMessage: e.target.value})}
-                  />
-               </div>
-
-               <div className="bg-blue-50/30 p-6 rounded-2xl border border-blue-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <CalendarDays size={20} className="text-blue-500" />
-                      <label className="text-[11px] font-black text-gray-600 uppercase tracking-widest">DIAS ANTECEDÊNCIA (RENOVAÇÃO)</label>
-                    </div>
-                    <input 
-                      type="number" 
-                      className="w-16 border-2 border-blue-200 rounded-lg p-2 text-center font-black bg-white text-black"
-                      value={config.renewalWarningDays}
-                      onChange={e => setConfig({...config, renewalWarningDays: Number(e.target.value)})}
-                    />
-                  </div>
-                  <textarea 
-                    className="w-full border-2 border-gray-100 rounded-xl p-4 bg-white text-black text-sm font-bold focus:border-blue-500 outline-none"
-                    rows={3}
-                    value={config.renewalMessage}
-                    onChange={e => setConfig({...config, renewalMessage: e.target.value})}
-                  />
-                  <p className="text-[10px] text-gray-400 mt-2 italic font-bold">Tags: [CRIANCA], [DIAS], [DATA_VENCIMENTO]</p>
-               </div>
-             </div>
-
-             <div className="bg-green-50/30 p-6 rounded-2xl border border-green-100">
-                <div className="flex items-center gap-3 mb-4">
-                  <HeartHandshake size={20} className="text-green-600" />
-                  <label className="text-[11px] font-black text-gray-600 uppercase tracking-widest">AGRADECIMENTO DE RENOVAÇÃO</label>
-                </div>
-                <textarea 
-                  className="w-full border-2 border-gray-100 rounded-xl p-4 bg-white text-black text-sm font-bold focus:border-blue-500 outline-none"
-                  rows={3}
-                  value={config.renewalThanksMessage}
-                  onChange={e => setConfig({...config, renewalThanksMessage: e.target.value})}
-                />
-                <p className="text-[10px] text-gray-400 mt-2 italic font-bold">Tags: [CRIANCA], [PLANO]</p>
-             </div>
-
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
-                  <div className="flex items-center gap-2 mb-4">
-                    <UserCheck size={16} className="text-green-500" />
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">TEMPLATE BOAS-VINDAS</label>
-                  </div>
-                  <textarea 
-                    className="w-full border-2 border-gray-100 rounded-xl p-4 bg-white text-black text-sm font-bold focus:border-blue-500 outline-none"
-                    rows={4}
-                    value={config.entryMessage}
-                    onChange={e => setConfig({...config, entryMessage: e.target.value})}
-                  />
-                </div>
-                <div className="bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Dumbbell size={16} className="text-blue-500" />
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">TEMPLATE PLANO ACADEMIA</label>
-                  </div>
-                  <textarea 
-                    className="w-full border-2 border-gray-100 rounded-xl p-4 bg-white text-black text-sm font-bold focus:border-blue-500 outline-none"
-                    rows={4}
-                    value={config.academyMessage}
-                    onChange={e => setConfig({...config, academyMessage: e.target.value})}
-                  />
-                </div>
-             </div>
-=======
             <div className="flex items-center gap-3 text-gray-800">
               <div className="bg-green-100 p-2 rounded-lg"><CreditCard className="text-green-600" size={20} /></div>
               <h3 className="font-black uppercase text-sm tracking-widest">Ajuste de Valores (Academia)</h3>
@@ -559,53 +422,9 @@ const ConnectionsPanel: React.FC = () => {
                 />
               </div>
             </div>
->>>>>>> babe606 (Implementação de Envio em Massa, Agenda Academia e Formulário Público de Agendamento)
           </div>
 
-          {/* NOVO CAMPO DE LOGO (ÚLTIMA LINHA) */}
           <div className="space-y-6 pt-8 border-t border-gray-100">
-<<<<<<< HEAD
-             <div className="flex items-center gap-3 text-gray-800">
-               <div className="bg-blue-100 p-2 rounded-lg"><ImageIcon className="text-blue-600" size={20} /></div>
-               <h3 className="font-black uppercase text-sm tracking-widest">IMAGEM REFERÊNCIA (LOGO PNG)</h3>
-             </div>
-             
-             <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center">
-                {config.logoBase64 ? (
-                  <div className="relative group mb-4">
-                    <img src={config.logoBase64} alt="Preview Logo" className="h-32 object-contain rounded-lg shadow-md bg-white p-2" />
-                    <button 
-                      type="button"
-                      onClick={() => setConfig({...config, logoBase64: ''})}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-2 py-4 text-gray-400">
-                    <Upload size={48} strokeWidth={1.5} />
-                    <p className="text-xs font-bold uppercase tracking-widest">Nenhuma logo personalizada salva</p>
-                  </div>
-                )}
-
-                <input 
-                  type="file" 
-                  accept="image/png"
-                  className="hidden" 
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="bg-white border-2 border-blue-500 text-blue-600 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-50 transition-all shadow-sm"
-                >
-                  {config.logoBase64 ? 'Alterar Logo (.PNG)' : 'Anexar Logo (.PNG)'}
-                </button>
-                <p className="text-[9px] text-gray-400 mt-3 font-bold uppercase">Recomendado: Fundo Transparente | PNG | Máx 500kb</p>
-             </div>
-=======
             <div className="flex items-center gap-3 text-gray-800">
               <div className="bg-blue-100 p-2 rounded-lg"><ImageIcon className="text-blue-600" size={20} /></div>
               <h3 className="font-black uppercase text-sm tracking-widest">IMAGEM REFERÊNCIA (LOGO PNG)</h3>
@@ -648,7 +467,6 @@ const ConnectionsPanel: React.FC = () => {
             </div>
           </div>
 
-          {/* ENVIO EM MASSA (MARKETING) */}
           <div className="space-y-6 pt-8 border-t border-gray-100">
             <div className="flex items-center gap-3 text-gray-800">
               <div className="bg-purple-100 p-2 rounded-lg"><Send className="text-purple-600" size={20} /></div>
@@ -656,7 +474,6 @@ const ConnectionsPanel: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Acadêmicos */}
               <div className="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 flex flex-col h-full ring-2 ring-purple-100/50">
                 <div className="flex items-center gap-2 mb-3">
                   <Dumbbell size={16} className="text-purple-600" />
@@ -680,7 +497,6 @@ const ConnectionsPanel: React.FC = () => {
                 </button>
               </div>
 
-              {/* Convencionais */}
               <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex flex-col h-full ring-2 ring-blue-100/50">
                 <div className="flex items-center gap-2 mb-3">
                   <UserCheck size={16} className="text-blue-600" />
@@ -704,7 +520,6 @@ const ConnectionsPanel: React.FC = () => {
                 </button>
               </div>
 
-              {/* Últimos Visitantes */}
               <div className="bg-orange-50/50 p-6 rounded-2xl border border-orange-100 flex flex-col h-full ring-2 ring-orange-100/50">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -739,7 +554,6 @@ const ConnectionsPanel: React.FC = () => {
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider text-center">
               ⚠️ O envio em massa pode levar alguns segundos dependendo da quantidade de contatos. Duplicatas são removidas automaticamente.
             </p>
->>>>>>> babe606 (Implementação de Envio em Massa, Agenda Academia e Formulário Público de Agendamento)
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 pt-8">
@@ -760,10 +574,7 @@ const ConnectionsPanel: React.FC = () => {
             </div>
           )}
         </form>
-<<<<<<< HEAD
-=======
 
-        {/* MODAL DE PROGRESSO DE ENVIO EM MASSA */}
         {showProgressModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-200">
@@ -778,7 +589,6 @@ const ConnectionsPanel: React.FC = () => {
               </div>
 
               <div className="p-8 space-y-8">
-                {/* Barra de Progresso */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status Geral</span>
@@ -794,7 +604,6 @@ const ConnectionsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Stats Rápidos */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-green-50 p-4 rounded-2xl border border-green-100">
                     <p className="text-[9px] font-black text-green-600 uppercase mb-1">Sucessos</p>
@@ -806,7 +615,6 @@ const ConnectionsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Lista dos Últimos 10 */}
                 <div className="space-y-3">
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Últimos Envios (Histórico)</p>
                   <div className="bg-gray-50 rounded-2xl border border-gray-100 max-h-48 overflow-y-auto p-4 space-y-2">
@@ -826,7 +634,6 @@ const ConnectionsPanel: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Controles de Pausa/Cancelamento */}
                 <div className="flex gap-4 pt-4 border-t border-gray-100">
                   <button
                     type="button"
@@ -834,8 +641,7 @@ const ConnectionsPanel: React.FC = () => {
                       isPausedRef.current = !isPausedRef.current;
                       setProgressData(prev => ({ ...prev, isPaused: isPausedRef.current }));
                     }}
-                    className={`flex-1 p-4 rounded-xl flex items-center justify-center gap-2 font-black text-xs uppercase transition-all active:scale-95 ${progressData.isPaused ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-blue-50 text-blue-600 border border-blue-100'
-                      }`}
+                    className={`flex-1 p-4 rounded-xl flex items-center justify-center gap-2 font-black text-xs uppercase transition-all active:scale-95 ${progressData.isPaused ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}
                   >
                     {progressData.isPaused ? (
                       <><Play size={18} /> Continuar</>
@@ -858,7 +664,6 @@ const ConnectionsPanel: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Botão de Fechar (Só aparece quando terminar ou cancelar) */}
                 {(progressData.current === progressData.total || isCancelledRef.current) && (
                   <button
                     onClick={() => setShowProgressModal(false)}
@@ -871,7 +676,6 @@ const ConnectionsPanel: React.FC = () => {
             </div>
           </div>
         )}
->>>>>>> babe606 (Implementação de Envio em Massa, Agenda Academia e Formulário Público de Agendamento)
       </div>
     </div>
   );
